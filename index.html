@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>Chat IA</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #0f172a;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+header {
+  padding: 15px;
+  text-align: center;
+  background: #020617;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+#chat {
+  flex: 1;
+  padding: 15px;
+  overflow-y: auto;
+}
+
+.msg {
+  max-width: 70%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 10px;
+  animation: fadeIn 0.3s ease;
+}
+
+.user {
+  background: #2563eb;
+  margin-left: auto;
+}
+
+.bot {
+  background: #1e293b;
+}
+
+@keyframes fadeIn {
+  from {opacity: 0; transform: translateY(10px);}
+  to {opacity: 1; transform: translateY(0);}
+}
+
+#inputArea {
+  display: flex;
+  padding: 10px;
+  background: #020617;
+}
+
+input {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  outline: none;
+}
+
+button {
+  margin-left: 10px;
+  padding: 10px 15px;
+  border: none;
+  background: #22c55e;
+  color: white;
+  border-radius: 8px;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<header>🤖 Meu Chat IA</header>
+
+<div id="chat"></div>
+
+<div id="inputArea">
+  <input id="msg" placeholder="Digite..." />
+  <button onclick="enviar()">Enviar</button>
+</div>
+
+<script>
+const chat = document.getElementById("chat");
+
+function addMsg(text, type) {
+  const div = document.createElement("div");
+  div.className = "msg " + type;
+  div.innerText = text;
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+async function enviar() {
+  const input = document.getElementById("msg");
+  const texto = input.value;
+  if (!texto) return;
+
+  addMsg(texto, "user");
+  input.value = "";
+
+  addMsg("...", "bot");
+
+  try {
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ msg: texto })
+    });
+
+    const data = await res.json();
+
+    chat.lastChild.remove();
+    addMsg(data.resposta, "bot");
+
+  } catch (err) {
+    chat.lastChild.remove();
+    addMsg("Erro ao conectar", "bot");
+  }
+}
+</script>
+
+</body>
+</html>
